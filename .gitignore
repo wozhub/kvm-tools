@@ -1,3 +1,5 @@
+./prueba.py #script con datos sensibles
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
