@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 from libvirt import open as libvirtOpen
-from gzip import open as gzipOpen
-from os import remove
+
 from xml.dom.minidom import parseString
 from time import sleep
 from datetime import date
@@ -10,7 +9,7 @@ from os.path import exists
 from os import makedirs, listdir
 
 from ssh import ssh_wrapper
-from utiles import borrarArbol
+from utiles import borrarArbol, comprimirArchivo
 
 estados = {0: 'no state', 1: 'running', 2: 'blocked on resource',
            3: 'paused by user', 4: 'being shut down', 5: 'shut off',
@@ -155,7 +154,8 @@ class kvmGuest():
 
         for d in self.discos():
             destino = self.ruta_respaldos+'/'+d.nombre
-            d.respaldar(destino)
+            d.copiar(destino)
+            comprimirArchivo(destino)
 
         if estado_original == 1:
             self.encender()
@@ -211,15 +211,4 @@ class kvmDisc():
         sftp = self.ssh.getSftp()
         sftp.get(self.ruta, destino)
 
-    def _comprimir(self, destino):
-        print "Comprimiendo %s" % destino
 
-        try:
-            f_in = open(destino, 'rb')
-            f_out = gzipOpen(destino+'.gz', 'wb')
-            f_out.writelines(f_in)
-            f_out.close()
-            f_in.close()
-            remove(destino)
-        except:
-            pass
